@@ -1,5 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ContextProvider } from "./ContextApi";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,7 +13,18 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <title>
+          Quiz-app
+        </title>
+      </head>
+
+      <body className={inter.className}>
+        <ContextProvider>
+          <Toaster position="top-center" />
+          <main>{children}</main>
+        </ContextProvider>
+      </body>
     </html>
   );
 }
