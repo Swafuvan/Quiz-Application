@@ -4,21 +4,23 @@ import QuizzesArea from "./componenets/QuizzesArea";
 import Navbar from "./componenets/Navbar";
 import useGlobalContextProvider from "./ContextApi";
 import { useEffect } from "react";
+import { Toaster } from "react-hot-toast";
 
 export default function Home() {
-  const {quizToStartObject} = useGlobalContextProvider();
-  const {setSelectQuizToStart} = quizToStartObject;
+  const { quizToStartObject } = useGlobalContextProvider();
+  const { setSelectQuizToStart } = quizToStartObject;
 
-  useEffect(()=>{
+  useEffect(() => {
     setSelectQuizToStart(null);
-  },[])
+  }, [])
 
   return (
     <div>
+      <Toaster />
       <header>
-        <Navbar/>
+        <Navbar />
       </header>
-      <QuizzesArea/>
+      <QuizzesArea />
     </div>
   );
 }

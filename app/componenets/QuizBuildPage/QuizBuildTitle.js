@@ -3,6 +3,8 @@ import { faCode } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect, useRef, useState } from 'react'
 import useGlobalContextProvider from '../../ContextApi';
+import convertFaToText from '../../convertFromFaToText';
+import convertToFaIcons from '../../convertToFaIcons'
 
 function QuizBuildTitle({ focusProp,onChangeQuizTitle }) {
     const { focus } = focusProp;
@@ -13,7 +15,7 @@ function QuizBuildTitle({ focusProp,onChangeQuizTitle }) {
         return selectedQuiz ? selectedQuiz.quizTitle : ''
     })
     const {setOpenIconBox} = openBoxToggle;
-    const {selectedIcon} = selectedIconObject; 
+    const {selectedIcon,setSelectedIcon} = selectedIconObject; 
 
     function handleTextInputChange(text) {
         setQuizTitle(text);
@@ -25,6 +27,15 @@ function QuizBuildTitle({ focusProp,onChangeQuizTitle }) {
             quizTitleRef.current.focus();
         }
     }, []);
+
+    useEffect(()=>{
+        if(typeof selectedIcon.faIcon === 'string'){
+            const newFaIcon = convertToFaIcons(selectedIcon.faIcon);
+            const copySelectedIcon = {...selectedIcon};
+            copySelectedIcon.faIcon = newFaIcon;
+            setSelectedIcon(copySelectedIcon)
+        }
+    },[])
     return (
         <div className='p-3 flex justify-between border border-green-700 rounded-md'>
             <div className='flex gap-2'>

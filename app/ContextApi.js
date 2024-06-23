@@ -1,7 +1,7 @@
 "use client";
 import React, { useContext, useState, createContext, useEffect } from 'react'
 import { QuizzesData } from './Datas';
-import {  faQuestion } from '@fortawesome/free-solid-svg-icons';
+import {  faL, faQuestion } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 
 export const GlobalContext = createContext();
@@ -55,6 +55,35 @@ export function ContextProvider({ children }) {
     //     }
     //     fetchAllQuizzes();
     // },[]);
+
+    useEffect(()=>{
+        const fetchUser = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/user',{
+                    method: 'POST',
+                    headers:{'Content-type':'application/json'},
+                    body:JSON.stringify({
+                        name:"quizUser",
+                        isLogged:false,
+                        experience:0,
+                    })
+                })
+                if(!response.ok){
+                    toast.error('Something Went wrong...');
+                    throw new Error('fetching failed...');
+                }
+                const userData = await response.json();
+                if(userData.message === 'User already exists'){
+                    setUser(userData.user);
+                }else {
+                    setUser(userData.user);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        fetchUser();
+    },[]);
 
     useEffect(()=>{
         setUser((prevUser)=>({

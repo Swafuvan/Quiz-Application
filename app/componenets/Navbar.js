@@ -1,18 +1,32 @@
 import Image from 'next/image'
 import React from 'react'
 import useGlobalContextProvider from '../ContextApi'
+import toast from 'react-hot-toast';
 
 function Navbar() {
     const {userObject,userXPObject} = useGlobalContextProvider();
     const {user,setUser} = userObject;
     const {userXP} = userXPObject;
 
-    function changeTheLoginState(){
+    async function changeTheLoginState(){
         const userCopy = {...user};
         userCopy.isLogged =!userCopy.isLogged;
-        setTimeout(()=>{
+        try {
+            const response = await fetch(`http://localhost:3000/api/user?id=${userCopy._id}`,{
+                method:'PUT',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify({updateUser:userCopy})
+            })
+            if(!response.ok){
+                toast.error('Something went wrong...');
+                throw new Error('fetching failed...');
+            }
             setUser(userCopy);
-        },600);
+        } catch (error) {
+            console.log(error);
+        }
     }
   return (
     <div>
@@ -33,7 +47,7 @@ function Navbar() {
                         {user.isLogged && (
                             <div className='flex gap-2'>
                                 <span>Welcome: {user.name}</span>
-                                <span className='font-bold text-green-700'>{userXP} XP</span>
+                                <span className='font-bold text-green-700'>{user.experience} XP</span>
                             </div>
                         )}
                         <button type='button' onClick={()=>changeTheLoginState()}

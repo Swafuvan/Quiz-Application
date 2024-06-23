@@ -79,7 +79,7 @@ const quizzesData = [
                 "C. var myFunction = function()",
                 "D. Both B and C",
             ],
-            correctAnswer: 1,
+            correctAnswer: 0,
             answeredResult: -1,
             statistics: {
                 totalAttempts: 3,

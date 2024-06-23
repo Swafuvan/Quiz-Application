@@ -5,9 +5,10 @@ import useGlobalContextProvider from "../../ContextApi";
 import Image from "next/image";
 import toast, { Toaster } from "react-hot-toast";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 function QuizStartquestions({ onUpdateTime }) {
-    const { quizToStartObject, allQuizzes, setAllQuizzes ,userXPObject } = useGlobalContextProvider();
+    const { quizToStartObject, allQuizzes, setAllQuizzes ,userXPObject,userObject } = useGlobalContextProvider();
     const { selectQuizToStart } = quizToStartObject;
     const { quizQuestions } = selectQuizToStart;
     const {setUserXP} = userXPObject
@@ -16,6 +17,7 @@ function QuizStartquestions({ onUpdateTime }) {
     const [indexOfQuizSelected, setIndexOfQuizSelected] = useState(null);
     const [isQuizEnded, setIsQuizEnded] = useState(false);
     const [score, setScore] = useState(0);
+    const [user,setUser] = userObject;
 
     const [timer, setTimer] = useState(29);
     const time = 29;
@@ -34,6 +36,27 @@ function QuizStartquestions({ onUpdateTime }) {
                 return currentTime - 1;
             });
         }, 1000)
+    }
+
+    async function saveDataIntoDB(){
+        try {
+            const id = selectQuizToStart._id;
+            const res = await fetch(`http://localhost:3000/api/quizzes?id=${id}`,{
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    updateQuizQuestions: allQuizzes[indexOfQuizSelected].quizQuestions,
+                })
+            })
+            if(!res.ok){
+                toast.error('Something went wrong while saving...');
+                return;
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     useEffect(() => {
@@ -78,6 +101,7 @@ function QuizStartquestions({ onUpdateTime }) {
                 quizQuestion.answeredResult = -1
             })
         }
+        saveDataIntoDB();
     }, [isQuizEnded])
 
     function moveToTheNextQuestion() {
@@ -93,7 +117,7 @@ function QuizStartquestions({ onUpdateTime }) {
 
         if (allQuizzes[indexOfQuizSelected].quizQuestions[currentQuestionIndex]
             .answeredResult !== allQuizzes[indexOfQuizSelected].quizQuestions[currentQuestionIndex]
-                .correctAttempts) {
+                .correctAnswer) {
             allQuizzes[indexOfQuizSelected].quizQuestions[currentQuestionIndex]
                 .statistics.incorrectAttempts += 1;
             toast.error('Incorrect Answer');
@@ -104,7 +128,7 @@ function QuizStartquestions({ onUpdateTime }) {
                         return current + 1;
                     })
                     setSelectedChoice(null);
-                }, 1200)
+                }, 1000)
             } else {
                 setTimer(0);
                 setIsQuizEnded(true);
@@ -119,7 +143,7 @@ function QuizStartquestions({ onUpdateTime }) {
         setScore((prevState) => prevState + 1);
 
         toast.success("Awesome :)")
-        setUserXP((prevState)=>prevState+1)
+        addExperience();
 
         // this will stop the timer and end the quiz
         if (currentQuestionIndex === quizQuestions.length - 1 &&
@@ -136,8 +160,30 @@ function QuizStartquestions({ onUpdateTime }) {
             // increment the currentQuestion index by 1 to go to the next question 
             setCurrentQuestionIndex((curr) => curr + 1);
             setSelectedChoice(null);
-        },2000);
+        },1000);
+    }
 
+    async function addExperience(){
+        const userCopy = user;
+        userCopy.experience += 1;
+        try {
+            const response = await fetch(`http://localhost:3000/api/user?id=${userCopy._id}`,{
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    updateUser: userCopy
+                })
+            })
+            if(!response.ok){
+                toast.error('Something went wrong...');
+                throw new Error('fetching failed...');
+            }
+            setUser(userCopy);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     function selectChoiceFunction(choiceIndexClicked) {
@@ -164,7 +210,7 @@ function QuizStartquestions({ onUpdateTime }) {
                     {currentQuestionIndex + 1}
                 </div>
                 <p>
-                    {quizQuestions[currentQuestionIndex].mainQuestion}
+                    {quizQuestions[currentQuestionIndex].mainQuestion }
                 </p>
             </div>
             <div className='mt-7 flex flex-col gap-2'>
@@ -275,6 +321,7 @@ function ScoreComponent({ quizStartParentProps }) {
                             Incorrect Answers:{selectQuizToStart.quizQuestions.length - score}
                         </span>
                     </div>
+                    <Link href="/" className="font-bold p-4 text-green-700">Select Another Quiz</Link>
                 </div>
             </div>
 
